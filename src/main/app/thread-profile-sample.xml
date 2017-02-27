@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:context="http://www.springframework.org/schema/context" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tcp="http://www.mulesoft.org/schema/mule/tcp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/tcp http://www.mulesoft.org/schema/mule/tcp/current/mule-tcp.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+">
+   
+  <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="${http.config.port}" doc:name="HTTP Listener Configuration">
+        <http:worker-threading-profile maxThreadsActive="${http.config.maxThreadsActive}" maxThreadsIdle="${http.config.maxThreadsIdle}"
+         threadTTL="${http.config.threadTTL}" poolExhaustedAction="DISCARD_OLDEST" threadWaitTimeout="${http.config.threadWaitTimeout}"/>
+    </http:listener-config>
+    <http:request-config name="HTTP_Request_Configuration" host="google.com" port="80" doc:name="HTTP Request Configuration">
+        <tcp:client-socket-properties connectionTimeout="30000"/>
+    </http:request-config>
+    <http:connector name="DefaultHTTPConnector" clientSoTimeout="120000"  keepSendSocketOpen="false" doc:name="HTTP-HTTPS">
+    <receiver-threading-profile maxThreadsActive="10"/>
+    <dispatcher-threading-profile maxThreadsActive="10"/>
+</http:connector>
+    <context:property-placeholder location="thread-profile-${mule.env}.properties"/>
+    <flow name="thread-profile-sampleFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+      
+      <http:request config-ref="HTTP_Request_Configuration" path="/" method="GET" doc:name="HTTP"/>
+       <!-- 
+        <http:outbound-endpoint exchange-pattern="request-response" host="google.com" port="80" doc:name="HTTP" contentType="application/json" keepAlive="true"  mimeType="application/json"/>
+     -->
+    </flow>
+</mule>
